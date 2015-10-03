@@ -140,7 +140,7 @@ public class Game extends BasicGame
 			xos.remove(existingXO);
 		}
 		
-		if(type!=XO.REMOVE) {
+		if(type!=XO.BLANK) {
 			xos.add(new XO(field, type, userSet));
 		}
 	}

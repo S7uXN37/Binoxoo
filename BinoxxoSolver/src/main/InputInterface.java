@@ -54,7 +54,7 @@ public class InputInterface implements KeyListener, MouseListener {
 				type = XO.O;
 				break;
 			case Input.MOUSE_MIDDLE_BUTTON:
-				type = XO.REMOVE;
+				type = XO.BLANK;
 				break;
 			default:
 				return;

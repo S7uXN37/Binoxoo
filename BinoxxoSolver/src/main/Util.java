@@ -50,7 +50,7 @@ public class Util {
 	public static XO[] xosToFieldMap(ArrayList<XO> xos) {
 		XO[] map = new XO[Game.GRID_SIZE_X*Game.GRID_SIZE_Y];
 		for(int i=0; i<map.length ;i++) {
-			map[i] = null;
+			map[i] = new XO(i, XO.BLANK, false);
 		}
 		
 		for(XO xo : xos) {
