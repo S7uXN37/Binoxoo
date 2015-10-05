@@ -44,8 +44,17 @@ public class InputInterface implements KeyListener, MouseListener {
 	public void keyReleased(int key, char c) {}
 
 	@Override
-	public void mouseClicked(int button, int x, int y, int clickCount) {
-		int type = -1;
+	public void mouseClicked(int button, int x, int y, int clickCount) {}
+
+	@Override
+	public void mouseDragged(int oldx, int oldy, int newx, int newy) {}
+
+	@Override
+	public void mouseMoved(int oldx, int oldy, int newx, int newy) {}
+
+	@Override
+	public void mousePressed(int button, int x, int y) {
+		int type;
 		switch(button) {
 			case Input.MOUSE_LEFT_BUTTON:
 				type = XO.X;
@@ -61,15 +70,6 @@ public class InputInterface implements KeyListener, MouseListener {
 		}
 		game.setXO(type, Util.absCoordsToField(x, y), true);
 	}
-
-	@Override
-	public void mouseDragged(int oldx, int oldy, int newx, int newy) {}
-
-	@Override
-	public void mouseMoved(int oldx, int oldy, int newx, int newy) {}
-
-	@Override
-	public void mousePressed(int button, int x, int y) {}
 
 	@Override
 	public void mouseReleased(int button, int x, int y) {}

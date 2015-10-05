@@ -1,7 +1,6 @@
 package main;
 
 import java.awt.Font;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,6 +22,7 @@ public class Game extends BasicGame
 	public static final Color NO_AI_COLOR = Color.white;
 	public static final Color AI_COLOR = Color.yellow;
 	public static final Color ERR_COLOR = Color.red;
+	public static final Color SLN_COLOR = Color.green;
 	public static final Color GRID_COLOR = new Color(1F, 1F, 1F, 0.5F);
 	public static final Color BCKG_COLOR = Color.black;
 	public static final Color XO_USER_COLOR = Color.white;
@@ -30,7 +30,8 @@ public class Game extends BasicGame
 	
 	public GameContainer gameContainer;
 	
-	private ArrayList<XO> xos = new ArrayList<XO>();
+	private XO[] xos;
+	private boolean solved = false;
 	private boolean closeRequested = false;
 	private boolean usingAI = false;
 	private org.newdawn.slick.Font font;
@@ -40,6 +41,7 @@ public class Game extends BasicGame
 	public Game(String gamename)
 	{
 		super(gamename);
+		xos = new XO[GRID_SIZE_X*GRID_SIZE_Y];
 	}
 
 	@Override
@@ -51,7 +53,9 @@ public class Game extends BasicGame
 	}
 	
 	public void reset() {
-		xos.clear();
+		for(int i=0; i<GRID_SIZE_X*GRID_SIZE_Y ;i++) {
+			xos[i] = new XO(i, XO.BLANK, false);
+		}
 		
 		closeRequested = false;
 		
@@ -61,14 +65,25 @@ public class Game extends BasicGame
 		gameContainer.getInput().addMouseListener(new InputInterface(this));
 	}
 	
-	boolean needsUpdate = false;
+	boolean needsUpdate = true;
 	boolean gridValid = true;
+	
 	@Override
 	public void update(GameContainer gc, int i) throws SlickException {
-		gridValid = Solver.isGridValid(Util.xosToFieldMap(xos));
+		if(!needsUpdate) return;
 		
-		if(gridValid && usingAI) {
-			Solver.update(this, Util.xosToFieldMap(xos));
+		gridValid = Solver.isGridValid(xos);
+		XO[] givenXOs = new XO[xos.length];
+		for(int m=0; m<xos.length ;m++) {
+			if(xos[m].userSet) {
+				givenXOs[m] = xos[m];
+			} else {
+				givenXOs[m] = new XO(m, XO.BLANK, false);
+			}
+		}
+		
+		if(usingAI) {
+			Solver.update(this, givenXOs);
 		}
 		
 		if(closeRequested) {
@@ -80,7 +95,7 @@ public class Game extends BasicGame
 	public void render(GameContainer gc, Graphics g) throws SlickException
 	{
 		// draw borders
-		g.setColor(gridValid ? (usingAI ? AI_COLOR : NO_AI_COLOR) : ERR_COLOR);
+		g.setColor(gridValid ? (solved ? SLN_COLOR : (usingAI ? AI_COLOR : NO_AI_COLOR) ) : ERR_COLOR);
 		g.fillRect(0, 0, WIDTH, HEIGHT);
 		
 		g.setColor(BCKG_COLOR);
@@ -122,27 +137,15 @@ public class Game extends BasicGame
 			
 			if(xo.type == XO.X) {
 				g.drawString("x", x, y);
-			} else {
+			} else if(xo.type == XO.O) {
 				g.drawString("o", x, y);
 			}
 		}
 	}
 	
 	public void setXO(int type, int field, boolean userSet) {
-		XO existingXO = null;
-		for(XO xo : xos) {
-			if(xo.field == field) {
-				existingXO = xo;
-				break;
-			}
-		}
-		if(existingXO != null) {
-			xos.remove(existingXO);
-		}
-		
-		if(type!=XO.BLANK) {
-			xos.add(new XO(field, type, userSet));
-		}
+		xos[field] = new XO(field, type, userSet);
+		needsUpdate = true;
 	}
 	
 	public void toggleUseAI() {
@@ -172,5 +175,19 @@ public class Game extends BasicGame
 	
 	public void close() {
 		closeRequested = true;
+	}
+
+	public void updateMap(XO[] newMap) {
+		xos = newMap.clone();
+		boolean hasBlank = false;
+		for(XO xo : xos) {
+			if(xo.type==XO.BLANK) {
+				hasBlank = true;
+				break;
+			}
+		}
+		
+		gridValid = Solver.isGridValid(xos);
+		solved = !hasBlank && gridValid;
 	}
 }

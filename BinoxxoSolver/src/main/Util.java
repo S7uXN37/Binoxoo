@@ -46,17 +46,18 @@ public class Util {
 		int GridY = (y-Game.BORDER_SIZE)/Game.PX_PER_GRID;
 		return coordsToField(GridX, GridY);
 	}
-	
-	public static XO[] xosToFieldMap(ArrayList<XO> xos) {
-		XO[] map = new XO[Game.GRID_SIZE_X*Game.GRID_SIZE_Y];
-		for(int i=0; i<map.length ;i++) {
-			map[i] = new XO(i, XO.BLANK, false);
+
+	public static boolean hasSameElements(ArrayList<String> list) {
+		for(int i=0; i<list.size()-1 ;i++) {
+			Object el1 = list.get(i);
+			for(int m=i+1; m<list.size() ;m++) {
+				Object el2 = list.get(m);
+				if(el1.equals(el2)) {
+					return true;
+				}
+			}
 		}
 		
-		for(XO xo : xos) {
-			map[xo.field] = xo;
-		}
-		
-		return map;
+		return false;
 	}
 }
