@@ -1,15 +1,13 @@
 package main;
 
 public class XO {
-	public static final int X = 0;
-	public static final int O = 1;
-	public static final int BLANK = -1;
+	public static enum Type { X, O, BLANK };
 	
 	public int field;
-	public int type;
+	public Type type;
 	public boolean userSet;
 	
-	public XO(int field, int type, boolean userSet) {
+	public XO(int field, Type type, boolean userSet) {
 		this.field = field;
 		this.type = type;
 		this.userSet = userSet;

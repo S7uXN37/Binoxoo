@@ -37,6 +37,9 @@ public class InputInterface implements KeyListener, MouseListener {
 			case Input.KEY_SPACE:
 				game.toggleUseAI();
 				break;
+			case Input.KEY_F:
+				game.useAIOnce();
+				break;
 		}
 	}
 	
@@ -54,21 +57,23 @@ public class InputInterface implements KeyListener, MouseListener {
 
 	@Override
 	public void mousePressed(int button, int x, int y) {
-		int type;
+		XO.Type type;
 		switch(button) {
 			case Input.MOUSE_LEFT_BUTTON:
-				type = XO.X;
+				type = XO.Type.X;
 				break;
 			case Input.MOUSE_RIGHT_BUTTON:
-				type = XO.O;
+				type = XO.Type.O;
 				break;
 			case Input.MOUSE_MIDDLE_BUTTON:
-				type = XO.BLANK;
+				type = XO.Type.BLANK;
 				break;
 			default:
 				return;
 		}
-		game.setXO(type, Util.absCoordsToField(x, y), true);
+		if(Util.absCoordsToField(x, y)<Game.GRID_SIZE_X*Game.GRID_SIZE_Y && Util.absCoordsToField(x, y)>=0) {
+			game.setXO(type, Util.absCoordsToField(x, y), true);
+		}
 	}
 
 	@Override

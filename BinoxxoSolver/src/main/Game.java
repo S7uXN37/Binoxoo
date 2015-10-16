@@ -27,14 +27,17 @@ public class Game extends BasicGame
 	public static final Color BCKG_COLOR = Color.black;
 	public static final Color XO_USER_COLOR = Color.white;
 	public static final Color XO_GEN_COLOR = new Color(1F, 1F, 1F, 0.5F);
+	public static final boolean DEBUG = true;
 	
 	public GameContainer gameContainer;
+	public Debugger debug;
 	
 	private XO[] xos;
 	private boolean solved = false;
 	private boolean closeRequested = false;
 	private boolean usingAI = false;
-	private org.newdawn.slick.Font font;
+	private boolean useAIOnce = false;
+	protected org.newdawn.slick.Font font;
 	protected static int WIDTH;
 	protected static int HEIGHT;
 	
@@ -50,11 +53,13 @@ public class Game extends BasicGame
 		gameContainer.setAlwaysRender(true);
 		font = new TrueTypeFont(new Font("Arial", Font.BOLD, PX_PER_GRID), true);
 		reset();
+		
+		debug = new Debugger(DEBUG, this);
 	}
 	
 	public void reset() {
 		for(int i=0; i<GRID_SIZE_X*GRID_SIZE_Y ;i++) {
-			xos[i] = new XO(i, XO.BLANK, false);
+			xos[i] = new XO(i, XO.Type.BLANK, false);
 		}
 		
 		closeRequested = false;
@@ -69,8 +74,8 @@ public class Game extends BasicGame
 	boolean gridValid = true;
 	
 	@Override
-	public void update(GameContainer gc, int i) throws SlickException {
-		if(!needsUpdate) return;
+	public void update(GameContainer container, int delta) throws SlickException {
+		if(!needsUpdate && !useAIOnce) return;
 		
 		gridValid = Solver.isGridValid(xos);
 		XO[] givenXOs = new XO[xos.length];
@@ -78,22 +83,26 @@ public class Game extends BasicGame
 			if(xos[m].userSet) {
 				givenXOs[m] = xos[m];
 			} else {
-				givenXOs[m] = new XO(m, XO.BLANK, false);
+				givenXOs[m] = new XO(m, XO.Type.BLANK, false);
 			}
 		}
 		
-		if(usingAI) {
+		if(usingAI || useAIOnce) {
 			Solver.update(this, givenXOs);
+			useAIOnce = false;
 		}
 		
 		if(closeRequested) {
 			Log.info("Close has been requested, exiting...");
-			gc.exit();
+			container.exit();
 		}
 	}
 
 	public void render(GameContainer gc, Graphics g) throws SlickException
 	{
+		// draw debugger
+		debug.render(gc, g);
+		
 		// draw borders
 		g.setColor(gridValid ? (solved ? SLN_COLOR : (usingAI ? AI_COLOR : NO_AI_COLOR) ) : ERR_COLOR);
 		g.fillRect(0, 0, WIDTH, HEIGHT);
@@ -135,15 +144,15 @@ public class Game extends BasicGame
 			int x = (int) (absCoords[0] + ((float) PX_PER_GRID) * 0.25F);
 			int y = (int) (absCoords[2] - ((float) PX_PER_GRID) * 0.15F);
 			
-			if(xo.type == XO.X) {
+			if(xo.type == XO.Type.X) {
 				g.drawString("x", x, y);
-			} else if(xo.type == XO.O) {
+			} else if(xo.type == XO.Type.O) {
 				g.drawString("o", x, y);
 			}
 		}
 	}
 	
-	public void setXO(int type, int field, boolean userSet) {
+	public void setXO(XO.Type type, int field, boolean userSet) {
 		xos[field] = new XO(field, type, userSet);
 		needsUpdate = true;
 	}
@@ -163,7 +172,11 @@ public class Game extends BasicGame
 			HEIGHT = PX_PER_GRID * GRID_SIZE_Y + BORDER_SIZE*2;
 			AppGameContainer appgc;
 			appgc = new AppGameContainer(new Game("Binoxxo Solver"));
-			appgc.setDisplayMode(WIDTH, HEIGHT, false);
+			if(DEBUG) {
+				appgc.setDisplayMode(Debugger.WIDTH, Debugger.HEIGHT, false);
+			} else {
+				appgc.setDisplayMode(WIDTH, HEIGHT, false);
+			}
 			appgc.setShowFPS(false);
 			appgc.start();
 		}
@@ -181,7 +194,7 @@ public class Game extends BasicGame
 		xos = newMap.clone();
 		boolean hasBlank = false;
 		for(XO xo : xos) {
-			if(xo.type==XO.BLANK) {
+			if(xo.type==XO.Type.BLANK) {
 				hasBlank = true;
 				break;
 			}
@@ -189,5 +202,9 @@ public class Game extends BasicGame
 		
 		gridValid = Solver.isGridValid(xos);
 		solved = !hasBlank && gridValid;
+	}
+
+	public void useAIOnce() {
+		useAIOnce = true;
 	}
 }
