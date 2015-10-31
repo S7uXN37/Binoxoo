@@ -141,9 +141,9 @@ public class Solver {
 		do {
 			changed = false;
 			if(!changed) changed |= gaps(deducedMap);						// gaps
-			if(!changed) changed |= pairsOfTwo(deducedMap);				// pairs of two
+			if(!changed) changed |= pairsOfTwo(deducedMap);					// pairs of two
 			if(!changed) changed |= XOcount(deducedMap);					// XO count (one missing)
-			if(!changed) changed |= onlyValidCombination(deducedMap);	// only valid combination
+			if(!changed) changed |= onlyValidCombination(deducedMap);		// only valid combination
 		} while(changed);
 		
 		game.updateMap(deducedMap);
