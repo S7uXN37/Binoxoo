@@ -2,8 +2,6 @@ package main;
 
 import java.util.ArrayList;
 
-import org.newdawn.slick.util.Log;
-
 public class Solver {
 	final static int maxXOinX = Game.GRID_SIZE_X/2;
 	final static int maxXOinY = Game.GRID_SIZE_Y/2;

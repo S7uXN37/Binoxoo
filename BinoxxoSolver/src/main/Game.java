@@ -35,7 +35,8 @@ public class Game extends BasicGame
 	private boolean closeRequested = false;
 	private boolean usingAI = false;
 	private boolean useAIOnce = false;
-	protected org.newdawn.slick.Font font;
+	protected org.newdawn.slick.Font xoFont;
+	protected org.newdawn.slick.Font smallFont;
 	protected static int WIDTH;
 	protected static int HEIGHT;
 	
@@ -49,7 +50,8 @@ public class Game extends BasicGame
 	public void init(GameContainer gc) throws SlickException {
 		gameContainer = gc;
 		gameContainer.setAlwaysRender(true);
-		font = new TrueTypeFont(new Font("Arial", Font.BOLD, PX_PER_GRID), true);
+		xoFont = new TrueTypeFont(new Font("Arial", Font.BOLD, PX_PER_GRID), true);
+		smallFont = new TrueTypeFont(new Font("Arial", Font.PLAIN, 10), true);
 		reset();
 	}
 	
@@ -60,6 +62,7 @@ public class Game extends BasicGame
 		
 		closeRequested = false;
 		
+		
 		gameContainer.getInput().removeAllKeyListeners();
 		gameContainer.getInput().addKeyListener(new InputInterface(this));
 		gameContainer.getInput().removeAllMouseListeners();
@@ -68,12 +71,23 @@ public class Game extends BasicGame
 	
 	boolean needsUpdate = true;
 	boolean gridValid = true;
+	int updatesPerSecond = 0;
 	
 	@Override
 	public void update(GameContainer container, int delta) throws SlickException {
+		updatesPerSecond = (updatesPerSecond + 1000/delta)/2;
 		if(!needsUpdate && !useAIOnce) return;
-		
+		boolean hasBlank = false;
+		for(XO xo : map) {
+			if(xo.type==XO.Type.BLANK) {
+				hasBlank = true;
+				break;
+			}
+		}
+
+		solved = !hasBlank && gridValid;
 		gridValid = Solver.isGridValid(map);
+		
 		XO[] givenXOs = new XO[map.length];
 		for(int m=0; m<map.length ;m++) {
 			if(map[m].userSet) {
@@ -133,7 +147,7 @@ public class Game extends BasicGame
 				g.setColor(XO_GEN_COLOR);
 			}
 			
-			g.setFont(font);
+			g.setFont(xoFont);
 			int[] absCoords = Util.fieldToAbsCoords(i);
 			int x = (int) (absCoords[0] + ((float) PX_PER_GRID) * 0.25F);
 			int y = (int) (absCoords[2] - ((float) PX_PER_GRID) * 0.15F);
@@ -144,6 +158,11 @@ public class Game extends BasicGame
 				g.drawString("o", x, y);
 			}
 		}
+		
+		// draw update counter
+		g.setColor(Color.black);
+		g.setFont(smallFont);
+		g.drawString(""+updatesPerSecond, 2, -2);;
 	}
 	
 	public void setXO(XO.Type type, int field, boolean userSet) {
@@ -182,16 +201,6 @@ public class Game extends BasicGame
 
 	public void updateMap(XO[] newMap) {
 		map = newMap.clone();
-		boolean hasBlank = false;
-		for(XO xo : map) {
-			if(xo.type==XO.Type.BLANK) {
-				hasBlank = true;
-				break;
-			}
-		}
-		
-		gridValid = Solver.isGridValid(map);
-		solved = !hasBlank && gridValid;
 	}
 
 	public void useAIOnce() {
