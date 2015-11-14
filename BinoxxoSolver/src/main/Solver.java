@@ -160,7 +160,7 @@ public class Solver {
 				type2 = map[Util.coordsToField(col, y)].type;
 				
 				if(type0==type2 && type0!=XO.Type.BLANK && type1==XO.Type.BLANK) { // gap found
-					map[Util.coordsToField(col, y-1)] = new XO(Util.coordsToField(col, y-1), (type0==XO.Type.X ? XO.Type.O : XO.Type.X), false);
+					map[Util.coordsToField(col, y-1)] = new XO((type0==XO.Type.X ? XO.Type.O : XO.Type.X), false);
 					return true;
 				}
 			}
@@ -177,7 +177,7 @@ public class Solver {
 				type2 = map[Util.coordsToField(x, row)].type;
 				
 				if(type0==type2 && type0!=XO.Type.BLANK && type1==XO.Type.BLANK) { // gap found
-					map[Util.coordsToField(x-1, row)] = new XO(Util.coordsToField(x-1, row), (type0==XO.Type.X ? XO.Type.O : XO.Type.X), false);
+					map[Util.coordsToField(x-1, row)] = new XO((type0==XO.Type.X ? XO.Type.O : XO.Type.X), false);
 					return true;
 				}
 			}
@@ -198,11 +198,11 @@ public class Solver {
 				if(type0==type1 && type0!=XO.Type.BLANK) { // pair found
 					boolean changed = false;
 					if(y!=Game.GRID_SIZE_Y-1 && map[Util.coordsToField(col, y+1)].type == XO.Type.BLANK) {
-						map[Util.coordsToField(col, y+1)] = new XO(Util.coordsToField(col, y+1), (type0==XO.Type.X ? XO.Type.O : XO.Type.X), false);
+						map[Util.coordsToField(col, y+1)] = new XO((type0==XO.Type.X ? XO.Type.O : XO.Type.X), false);
 						changed = true;
 					}
 					if(y!=1 && map[Util.coordsToField(col, y-2)].type == XO.Type.BLANK) {
-						map[Util.coordsToField(col, y-2)] = new XO(Util.coordsToField(col, y-2), (type0==XO.Type.X ? XO.Type.O : XO.Type.X), false);
+						map[Util.coordsToField(col, y-2)] = new XO((type0==XO.Type.X ? XO.Type.O : XO.Type.X), false);
 						changed = true;
 					}
 					if(changed) {
@@ -223,11 +223,11 @@ public class Solver {
 				if(type0==type1 && type0!=XO.Type.BLANK) { // pair found
 					boolean changed = false;
 					if(x!=Game.GRID_SIZE_X-1 && map[Util.coordsToField(x+1, row)].type == XO.Type.BLANK) {
-						map[Util.coordsToField(x+1, row)] = new XO(Util.coordsToField(x+1, row), (type0==XO.Type.X ? XO.Type.O : XO.Type.X), false);
+						map[Util.coordsToField(x+1, row)] = new XO((type0==XO.Type.X ? XO.Type.O : XO.Type.X), false);
 						changed = true;
 					}
 					if(x!=1 && map[Util.coordsToField(x-2, row)].type == XO.Type.BLANK) {
-						map[Util.coordsToField(x-2, row)] = new XO(Util.coordsToField(x-2, row), (type0==XO.Type.X ? XO.Type.O : XO.Type.X), false);
+						map[Util.coordsToField(x-2, row)] = new XO((type0==XO.Type.X ? XO.Type.O : XO.Type.X), false);
 						changed = true;
 					}
 					if(changed) {
@@ -268,7 +268,7 @@ public class Solver {
 			}
 			if(fillType!=XO.Type.BLANK && blankYs.size()>0) {
 				for(int y : blankYs) {
-					map[Util.coordsToField(x, y)] = new XO(Util.coordsToField(x, y), fillType, false);
+					map[Util.coordsToField(x, y)] = new XO(fillType, false);
 				}
 				return true;
 			}
@@ -301,7 +301,7 @@ public class Solver {
 			}
 			if(fillType!=XO.Type.BLANK && blankXs.size()>0) {
 				for(int x : blankXs) {
-					map[Util.coordsToField(x, y)] = new XO(Util.coordsToField(x, y), fillType, false);
+					map[Util.coordsToField(x, y)] = new XO(fillType, false);
 				}
 				return true;
 			}
@@ -311,189 +311,154 @@ public class Solver {
 	}
 	
 	private static boolean onlyValidCombination(XO[] map) {
-		if(true) return false; // TODO fix code and remove
+		// if(true) return false; // TODO fix code and remove
 		
 		boolean changed = false;
-		for(int atCol=0; atCol<Game.GRID_SIZE_X; atCol++) {
+		for(int x=0; x<Game.GRID_SIZE_X; x++) {
 			ArrayList<Integer> blankInd = new ArrayList<Integer>();
-			XO[] column = new XO[Game.GRID_SIZE_Y];
+			StringBuilder column = new StringBuilder(Game.GRID_SIZE_Y);
 			
 			for(int y=0; y<Game.GRID_SIZE_Y; y++) {
-				if(map[Util.coordsToField(atCol, y)].type==XO.Type.BLANK) {
+				String type;
+				if( (type = map[Util.coordsToField(x, y)].type.toString() ) .equals("_")) {
 					blankInd.add(y);
 				}
-				column[y] = map[Util.coordsToField(atCol, y)];
+				column.append(type);
 			}
 			
-			if(blankInd.size()==0) {
+			if(blankInd.size()==0) { // no empty spots to fill, move on
 				continue;
 			}
 			
 			int combinations = (int) Math.pow(2, blankInd.size());
 			
-			XO[][] possibleCombinations = new XO[Game.GRID_SIZE_Y][combinations];
-			for(int c=0; c<combinations; c++) { // for each combination
-				for(int i=0; i<Game.GRID_SIZE_Y; i++) { // fill the combination-data with what exists
-					possibleCombinations[i][c] = column[i];
-				}
+			StringBuilder[] possibleCombinations = new StringBuilder[combinations];
+			for(int c=0; c<combinations; c++) { // pre-fill each combination
+				possibleCombinations[c] = new StringBuilder(column);
 			}
 			
-			for(int seed=0; seed<combinations; seed++) {	// seed = what combination I'm at
-				String bin_seed = Integer.toBinaryString(seed);
-				for(int i=0; i<blankInd.size(); i++) { 		// fill each blank; i = what blank is being filled
-					int y = blankInd.get(i);				// y = y-coordinate of the blank that's being filled
-					char charAtY = bin_seed.length()>i ? bin_seed.charAt(i) : '0';
-					switch(charAtY) {
-						case '1':
-							possibleCombinations[y][seed] = new XO(Util.coordsToField(atCol, y), XO.Type.X, false);
-							break;
-						case '0':
-							possibleCombinations[y][seed] = new XO(Util.coordsToField(atCol, y), XO.Type.O, false);
-							break;
-					}
+			for(int seed=0; seed<combinations; seed++) {	// set up all possible combinations; seed = what combination are we at TODO possibly very time consuming TODO also possibly wrong
+				StringBuilder bin_s = new StringBuilder(Integer.toBinaryString(seed));
+				while(column.length() > bin_s.length()) {
+					bin_s.insert(0, "0");
 				}
-			}
-			
-			ArrayList<Integer> validCombinations = new ArrayList<Integer>();
-			for(int c=0; c<combinations; c++) {
-				XO[] combination = new XO[Game.GRID_SIZE_Y];
-				for(int i=0; i<combination.length; i++) {
-					combination[i] = possibleCombinations[i][c];
-				}
+				bin_s.setLength(column.length());
+				String bin_seed = bin_s.toString();
 				
-				XO[] wc_map = map.clone();
-				for(int y=0; y<Game.GRID_SIZE_Y; y++) {
-					wc_map[Util.coordsToField(atCol, y)] = combination[y];
+				for(int i=0; i<blankInd.size(); i++) { 		// fill each blank; i = what blank is being filled
+					int place = blankInd.get(i);
+					char type = (bin_seed.length()>i ? bin_seed.charAt(bin_seed.length()-(i+1)) : '0') == '1' ? 'X' : 'O'; // interpret bin_seed at i to 'X' or 'O'
+					
+					possibleCombinations[seed].setCharAt(place, type);
+				}
+			}
+			
+			ArrayList<Integer> validCombinationInd = new ArrayList<Integer>();
+			XO[] wc_map = map.clone();
+			
+			for(int c=0; c<combinations; c++) {
+				for(int i=0; i<Game.GRID_SIZE_Y; i++) { // place combination into map, TODO more efficient: only replace on blankInd
+					wc_map[Util.coordsToField(x, i)] = XO.fromChar(possibleCombinations[c].charAt(i));
 				}
 				
 				if(isGridValid(wc_map)) {
-					validCombinations.add(c);
-					if(atCol==2) { // DEBUGGING TODO why does it output the same combination multiple times? why are all of those considered valid?
-						String v = "";
-						for(XO xo : combination) {
-							v += xo.type==XO.Type.BLANK ? "?" : (xo.type==XO.Type.X ? " X " : " O ");
-						}
-						Log.info("Valid: " + v);
-					}
+					validCombinationInd.add(c); // mark combination c as valid
 				}
 			}
 			
-			if(validCombinations.size()==0) {
+			if(validCombinationInd.size()==0) {
 				continue;
 			}
 			
-			XO[] conclusion = null;
-			for(int c : validCombinations) { // for each valid combination update the conclusion
-				if(conclusion==null) { // if it's the first time, fill in the first valid combination as conclusion
-					conclusion = new XO[Game.GRID_SIZE_Y];
-					for(int i=0; i<Game.GRID_SIZE_Y; i++) {
-						conclusion[i] = possibleCombinations[i][c];
-					}
-				} else { // if it's not, update the conclusion
-					for(int i=0; i<Game.GRID_SIZE_Y; i++) {
-						if(conclusion[i]!=null) { // conclusion exists
-							if(conclusion[i].type!=possibleCombinations[i][c].type) { // conclusion incorrect
-								conclusion[i] = null;
-							}
-						}
+			StringBuilder conclusion = new StringBuilder(possibleCombinations[ validCombinationInd.get(0) ].toString());
+			for(int m=1; m<validCombinationInd.size(); m++) { // for each valid combination, update the conclusion
+				String combination = possibleCombinations[ validCombinationInd.get(m) ].toString();
+				
+				for(int i=0; i<Game.GRID_SIZE_Y; i++) {
+					if(conclusion.charAt(i)!=combination.charAt(i)) { // combination differs from conclusion
+						conclusion.setCharAt(i, '?');
 					}
 				}
 			}
 			
-			for(int y=0; y<conclusion.length; y++) {
-				if(conclusion[y]!=null && map[Util.coordsToField(atCol, y)].type==XO.Type.BLANK) { // there is a conclusion on a blank field
-					map[Util.coordsToField(atCol, y)] = conclusion[y]; // fill it in
+			for(int i=0; i<conclusion.length(); i++) {
+				if(conclusion.charAt(i)!='?' && map[Util.coordsToField(x, i)].type==XO.Type.BLANK) { // there is a conclusion on a blank field
+					map[Util.coordsToField(x, i)] = XO.fromChar(conclusion.charAt(i)); // fill it in
 					changed = true;
 				}
 			}
 		}
 		
-		for(int atRow=0; atRow<Game.GRID_SIZE_Y; atRow++) {
+		for(int y=0; y<Game.GRID_SIZE_Y; y++) {
 			ArrayList<Integer> blankInd = new ArrayList<Integer>();
-			XO[] row = new XO[Game.GRID_SIZE_X];
+			StringBuilder column = new StringBuilder(Game.GRID_SIZE_X);
 			
 			for(int x=0; x<Game.GRID_SIZE_X; x++) {
-				if(map[Util.coordsToField(x, atRow)].type==XO.Type.BLANK) {
+				String type;
+				if( (type = map[Util.coordsToField(x, y)].type.toString() ) .equals("_")) {
 					blankInd.add(x);
 				}
-				row[x] = map[Util.coordsToField(x, atRow)];
+				column.append(type);
 			}
 			
-			if(blankInd.size()==0) {
+			if(blankInd.size()==0) { // no empty spots to fill, move on
 				continue;
 			}
 			
 			int combinations = (int) Math.pow(2, blankInd.size());
-			if(((double)combinations)!=Math.pow(2, blankInd.size())) {
-				Log.info("Calculation of all posibilities failed for row " + atRow + ", err code 1");
-				continue;
+			
+			StringBuilder[] possibleCombinations = new StringBuilder[combinations];
+			for(int c=0; c<combinations; c++) { // pre-fill each combination
+				possibleCombinations[c] = new StringBuilder(column);
 			}
 			
-			XO[][] possibleCombinations = new XO[Game.GRID_SIZE_X][combinations];
-			for(int c=0; c<combinations; c++) { // for each combination
-				for(int i=0; i<Game.GRID_SIZE_X; i++) { // fill the combination-data with what exists
-					possibleCombinations[i][c] = row[i];
+			for(int seed=0; seed<combinations; seed++) {	// set up all possible combinations; seed = what combination are we at TODO possibly very time consuming TODO also possibly wrong
+				StringBuilder bin_s = new StringBuilder(Integer.toBinaryString(seed));
+				while(column.length() > bin_s.length()) {
+					bin_s.insert(0, "0");
 				}
-			}
-			
-			for(int seed=0; seed<combinations; seed++) {	// seed = what combination I'm at
-				String bin_seed = Integer.toBinaryString(seed);
-				for(int i=0; i<blankInd.size(); i++) { 		// fill each blank; i = what blank is being filled
-					int x = blankInd.get(i);				// y = y-coordinate of the blank that's being filled
-					char charAtY = bin_seed.length()>i ? bin_seed.charAt(i) : '0';
-					switch(charAtY) {
-						case '1':
-							possibleCombinations[x][seed] = new XO(Util.coordsToField(x, atRow), XO.Type.X, false);
-							break;
-						case '0':
-							possibleCombinations[x][seed] = new XO(Util.coordsToField(x, atRow), XO.Type.O, false);
-							break;
-					}
-				}
-			}
-			
-			ArrayList<Integer> validCombinations = new ArrayList<Integer>();
-			for(int c=0; c<combinations; c++) {
-				XO[] combination = new XO[Game.GRID_SIZE_X];
-				for(int i=0; i<combination.length; i++) {
-					combination[i] = possibleCombinations[i][c];
-				}
+				bin_s.setLength(column.length());
+				String bin_seed = bin_s.toString();
 				
-				XO[] wc_map = map.clone();
-				for(int x=0; x<Game.GRID_SIZE_X; x++) {
-					wc_map[Util.coordsToField(x, atRow)] = combination[x];
+				for(int i=0; i<blankInd.size(); i++) { 		// fill each blank; i = what blank is being filled
+					int place = blankInd.get(i);
+					char type = (bin_seed.length()>i ? bin_seed.charAt(bin_seed.length()-(i+1)) : '0') == '1' ? 'X' : 'O'; // interpret bin_seed at i to 'X' or 'O'
+					
+					possibleCombinations[seed].setCharAt(place, type);
+				}
+			}
+			
+			ArrayList<Integer> validCombinationInd = new ArrayList<Integer>();
+			XO[] wc_map = map.clone();
+			
+			for(int c=0; c<combinations; c++) {
+				for(int i=0; i<Game.GRID_SIZE_Y; i++) { // place combination into map, TODO more efficient: only replace on blankInd
+					wc_map[Util.coordsToField(i, y)] = XO.fromChar(possibleCombinations[c].charAt(i));
 				}
 				
 				if(isGridValid(wc_map)) {
-					validCombinations.add(c);
+					validCombinationInd.add(c); // mark combination c as valid
 				}
 			}
 			
-			if(validCombinations.size()==0) {
+			if(validCombinationInd.size()==0) {
 				continue;
 			}
 			
-			XO[] conclusion = null;
-			for(int c : validCombinations) { // for each valid combination update the conclusion
-				if(conclusion==null) { // if it's the first time, fill in the first valid combination as conclusion
-					conclusion = new XO[Game.GRID_SIZE_X];
-					for(int i=0; i<Game.GRID_SIZE_X; i++) {
-						conclusion[i] = possibleCombinations[i][c];
-					}
-				} else { // if it's not, update the conclusion
-					for(int i=0; i<Game.GRID_SIZE_X; i++) {
-						if(conclusion[i]!=null) { // conclusion exists
-							if(conclusion[i].type!=possibleCombinations[i][c].type) { // conclusion incorrect
-								conclusion[i] = null;
-							}
-						}
+			StringBuilder conclusion = new StringBuilder(possibleCombinations[ validCombinationInd.get(0) ].toString());
+			for(int m=1; m<validCombinationInd.size(); m++) { // for each valid combination, update the conclusion
+				String combination = possibleCombinations[ validCombinationInd.get(m) ].toString();
+				
+				for(int i=0; i<Game.GRID_SIZE_Y; i++) {
+					if(conclusion.charAt(i)!=combination.charAt(i)) { // combination differs from conclusion
+						conclusion.setCharAt(i, '?');
 					}
 				}
 			}
 			
-			for(int x=0; x<conclusion.length; x++) {
-				if(conclusion[x]!=null && map[Util.coordsToField(x, atRow)].type==XO.Type.BLANK) { // there is a conclusion on a blank field
-					map[Util.coordsToField(x, atRow)] = conclusion[x]; // fill it in
+			for(int i=0; i<conclusion.length(); i++) {
+				if(conclusion.charAt(i)!='?' && map[Util.coordsToField(i, y)].type==XO.Type.BLANK) { // there is a conclusion on a blank field
+					map[Util.coordsToField(i, y)] = XO.fromChar(conclusion.charAt(i)); // fill it in
 					changed = true;
 				}
 			}

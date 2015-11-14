@@ -55,7 +55,7 @@ public class Game extends BasicGame
 	
 	public void reset() {
 		for(int i=0; i<GRID_SIZE_X*GRID_SIZE_Y ;i++) {
-			map[i] = new XO(i, XO.Type.BLANK, false);
+			map[i] = new XO(XO.Type.BLANK, false);
 		}
 		
 		closeRequested = false;
@@ -79,7 +79,7 @@ public class Game extends BasicGame
 			if(map[m].userSet) {
 				givenXOs[m] = map[m];
 			} else {
-				givenXOs[m] = new XO(m, XO.Type.BLANK, false);
+				givenXOs[m] = new XO(XO.Type.BLANK, false);
 			}
 		}
 		
@@ -147,7 +147,7 @@ public class Game extends BasicGame
 	}
 	
 	public void setXO(XO.Type type, int field, boolean userSet) {
-		map[field] = new XO(field, type, userSet);
+		map[field] = new XO(type, userSet);
 		needsUpdate = true;
 	}
 	
